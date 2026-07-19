@@ -1,0 +1,16 @@
+SHAP Explainability Report
+============================================================
+
+Top 10 Most Important Features
+
+                         Feature  Mean |SHAP|
+                cat__country_PRT     1.417769
+  num__total_of_special_requests     0.671558
+                  num__lead_time     0.598335
+num__required_car_parking_spaces     0.482157
+                      num__agent     0.403545
+    cat__deposit_type_Non Refund     0.396149
+     num__previous_cancellations     0.352852
+    cat__deposit_type_No Deposit     0.330134
+   cat__market_segment_Online TA     0.284610
+          num__arrival_date_year     0.225753

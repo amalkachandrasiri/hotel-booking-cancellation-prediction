@@ -8,9 +8,12 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.pipeline import Pipeline
 
-def fetch_data():
-    df = pd.read_csv(config.RAW_DATA_PATH)
+def fetch_data(path):
+    df = pd.read_csv(path)
     return df
+
+def save_data(df, path):
+    df.to_csv(path)    
 
 def describe_data(df):
     print(f'dataset shape - {df.shape[0]} rows X {df.shape[1]} columns')
