@@ -180,11 +180,106 @@ def outlier_analysis(df):
         print(f'{feature}  - Outliers : {len(outliers)} - Percentage : {(len(outliers)/len(df))*100:.2f}%')
         print('-'*40)
 
+# ---------------------------------------------
+# ----------- Bussiness Insights -------------- 
+# ---------------------------------------------
+
+def categorical_business_insights(df):
+
+    print('\n' + '=' * 60)
+    print('CATEGORICAL BUSINESS INSIGHTS')
+    print('=' * 60)
+
+    fig, axes = plt.subplots(1, 3, figsize=(18, 5))
+
+    categorical_features = [
+        ('hotel', 'Hotel Type'),
+        ('deposit_type', 'Deposit Type'),
+        ('market_segment', 'Market Segment')
+    ]
+
+    summaries = {}
+
+    for ax, (feature, title) in zip(axes, categorical_features):
+        summary = (
+            pd.crosstab(
+                df[feature],
+                df['is_canceled'],
+                normalize='index'
+            ) * 100
+        ).round(2)
+
+        summaries[feature] = summary
+
+        print(f'\n{title}')
+        print(summary)
+
+        cancellation_rate = (
+            df.groupby(feature)['is_canceled']
+              .mean()
+              .mul(100)
+              .sort_values(ascending=False)
+        )
+
+        sns.barplot(
+            x=cancellation_rate.index,
+            y=cancellation_rate.values,
+            ax=ax,
+            palette='Set2'
+        )
+
+        ax.set_title(title)
+        ax.set_xlabel('')
+        ax.set_ylabel('Cancellation Rate (%)')
+        ax.tick_params(axis='x', rotation=30)
+
+    plt.tight_layout()
+    plt.savefig(config.CAT_BUS_INSIGHTS, dpi = 300,  bbox_inches = 'tight')
+    plt.show()
+
+    return summaries
+
+def numerical_business_insights(df):
+
+    print('\n' + '=' * 60)
+    print('NUMERICAL BUSINESS INSIGHTS')
+    print('=' * 60)
+
+    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+
+    sns.boxplot(
+        data=df,
+        x='is_canceled',
+        y='lead_time',
+        ax=axes[0]
+    )
+
+    axes[0].set_title('Lead Time vs Cancellation')
+    axes[0].set_xlabel('Cancelled')
+    axes[0].set_ylabel('Lead Time (Days)')
+
+    sns.boxplot(
+        data=df,
+        x='is_canceled',
+        y='adr',
+        ax=axes[1]
+    )
+
+    axes[1].set_title('ADR vs Cancellation')
+    axes[1].set_xlabel('Cancelled')
+    axes[1].set_ylabel('Average Daily Rate')
+
+    plt.tight_layout()
+    plt.savefig(config.NUM_BUS_INSIGHTS, dpi = 300,  bbox_inches = 'tight')
+    plt.show()
+
 # wrapper 
 def run_eda(df):
     # dataset_overview(df)
-    missing_value_analysis(df)
+    # missing_value_analysis(df)
     # duplicate_analysis(df)
     # target_variable_analysis(df)
     # correlation_analysis(df)
-    outlier_analysis(df)
+    # outlier_analysis(df)
+    categorical_summary = categorical_business_insights(df)
+    numerical_business_insights(df)
