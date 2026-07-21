@@ -16,25 +16,29 @@ from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.layers import Input
 from tensorflow.keras.regularizers import l2
 
+import joblib
+
 from evaluation import (
     evaluate_model,
     compare_models,
     plot_roc_curves
 )
 from explainability import generate_shap_analysis
+from explainability import validate_shap_features
 
 # fetch raw data
 df = data_prep.fetch_data(config.RAW_DATA_PATH)
 # run_eda(df)
 
 X_train, X_test, y_train, y_test, preprocessor = data_prep.preprocess_data(df)
+
 data_prep.check_class_distribution(df['is_canceled'], y_train, y_test)
 
 # store processed data 
 data_prep.save_data(df, config.PROCESSED_DATA_PATH)
 
 # -------------   Model Training ---------------------
-'''
+
 # Logistic Regression
 print('\nTraining Logistic Regression...')
 
@@ -58,15 +62,19 @@ rf_model = RandomForestClassifier(n_estimators=300, max_depth = 20, min_samples_
 rf_model.fit(X_train, y_train)
 
 evaluate_model(rf_model, X_test, y_test, 'Random Forest')
-'''
+
 # CATBOOST
 print('\nTraining CatBoost...')
 
 cat_model = CatBoostClassifier(iterations=300, learning_rate=0.1, depth=6, random_seed=42, verbose=0)
 cat_model.fit(X_train, y_train)
 
+# save artifacts 
+cat_model.save_model(config.CATBOOST_MODEL)
+joblib.dump(preprocessor, config.PREPROCESSOR)
+
 evaluate_model(cat_model, X_test, y_test, 'CatBoost', preprocessor)
-'''
+
 # ANN
 print('\nTraining ANN...')
 
@@ -93,4 +101,6 @@ results = compare_models()
 plot_roc_curves()
 
 print('\nTraining Completed Successfully.')
-'''
+
+# validate SHAP features
+validate_shap_features(df)

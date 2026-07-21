@@ -95,3 +95,85 @@ def generate_shap_analysis(model, X_test, preprocessor):
     except Exception as e:
         print('\nSHAP Analysis Failed')
         print(e)
+
+import pandas as pd
+
+
+def validate_shap_features(df):
+
+    print('\n' + '='*70)
+    print('SHAP FEATURE VALIDATION')
+    print('='*70)
+
+    # country summary  
+    print('\nCancellation Rate by Country (%)')
+    country_summary = (df.groupby('country').agg(
+            Bookings=('is_canceled', 'count'),
+            Cancelled=('is_canceled', 'sum')
+        )
+    )
+
+    country_summary['Cancellation Rate (%)'] = (
+        country_summary['Cancelled'] /
+        country_summary['Bookings'] * 100
+    ).round(2)
+
+    country_summary = (country_summary.sort_values('Bookings', ascending=False))
+    country_summary = country_summary[country_summary['Bookings'] >= 50]
+
+    print(country_summary.head(10))
+
+    # Lead Time
+    print('\nAverage Lead Time')
+    print(df.groupby('is_canceled')['lead_time'].mean().round(2))
+
+    # Special Requests
+    print('\nAverage Special Requests')
+    print(df.groupby('is_canceled')['total_of_special_requests'].mean().round(2))
+
+    # Parking Spaces
+    print('\nAverage Parking Requests')
+    print(df.groupby('is_canceled')['required_car_parking_spaces'].mean().round(2))
+
+    # Previous Cancellations
+    print('\nAverage Previous Cancellations')
+    print(df.groupby('is_canceled')['previous_cancellations'].mean().round(2))
+
+    # Deposit Type
+    print('\nCancellation Rate by Deposit Type (%)')
+    deposit_summary = (df.groupby('deposit_type').agg(
+            Bookings=('is_canceled','count'),
+            Cancelled=('is_canceled','sum')
+        )
+    )
+
+    deposit_summary['Cancellation Rate (%)'] = (
+        deposit_summary['Cancelled'] /
+        deposit_summary['Bookings'] * 100
+    ).round(2)
+
+    print(deposit_summary.sort_values('Bookings', ascending=False))
+
+    # Market Segment
+    print('\nCancellation Rate by Market Segment (%)')
+    print(df.groupby('market_segment')['is_canceled'].mean().mul(100).round(2).sort_values(ascending=False))
+
+    # Agent
+    print('\nTop 10 Agents by Cancellation Rate')
+    agent_summary = (df.groupby('agent').agg(
+            Bookings=('is_canceled','count'),
+            Cancelled=('is_canceled','sum')
+        )
+    )
+
+    agent_summary['Cancellation Rate (%)'] = (
+        agent_summary['Cancelled'] /
+        agent_summary['Bookings'] * 100
+    ).round(2)
+
+    agent_summary = agent_summary.sort_values(
+        'Bookings',
+        ascending=False
+    )
+
+    print(agent_summary.head(20))

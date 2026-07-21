@@ -37,3 +37,7 @@ SHAP_REPORT              = BASE_DIR / 'output' / 'results' / 'shap_report.txt'
 CR_BY_MARKET_SGMNT       = BASE_DIR / 'output' / 'figures' / 'cr_by_market_sgmnt.png'
 LEADTIME_VS_CANCELLATION = BASE_DIR / 'output' / 'figures' / 'leadtime_vs_cancellation.png'
 ADR_VS_CANCELLATION      = BASE_DIR / 'output' / 'figures' / 'adr_vs_cancellation.png'
+
+# artifacts 
+CATBOOST_MODEL           = BASE_DIR / 'artifacts' / 'catboost_model.cbm'
+PREPROCESSOR             = BASE_DIR / 'artifacts' / 'preprocessor.pkl'
