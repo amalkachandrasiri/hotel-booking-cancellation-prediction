@@ -18,6 +18,9 @@ from tensorflow.keras.regularizers import l2
 
 import joblib
 
+import mlflow
+import mlflow.catboost
+
 from evaluation import (
     evaluate_model,
     compare_models,
@@ -63,17 +66,54 @@ rf_model.fit(X_train, y_train)
 
 evaluate_model(rf_model, X_test, y_test, 'Random Forest')
 
+
+mlflow.set_tracking_uri(f'sqlite:///{config.MLFLOW_DB_PATH.as_posix()}')
+mlflow.set_experiment('hotel-booking-cancellation')
+print('\nMLflow tracking URI:', mlflow.get_tracking_uri())
+
 # CATBOOST
 print('\nTraining CatBoost...')
 
-cat_model = CatBoostClassifier(iterations=300, learning_rate=0.1, depth=6, random_seed=42, verbose=0)
-cat_model.fit(X_train, y_train)
+with mlflow.start_run(run_name='catboost-final-model'):
+    cat_model = CatBoostClassifier(iterations=300, learning_rate=0.1, depth=6, random_seed=42, verbose=0)
+    cat_model.fit(X_train, y_train)
 
-# save artifacts 
-cat_model.save_model(config.CATBOOST_MODEL)
-joblib.dump(preprocessor, config.PREPROCESSOR)
+    # Save local artifacts
+    cat_model.save_model(config.CATBOOST_MODEL)
+    joblib.dump(preprocessor, config.PREPROCESSOR)
 
-evaluate_model(cat_model, X_test, y_test, 'CatBoost', preprocessor)
+    # Evaluate model
+    results = evaluate_model(cat_model, X_test, y_test, 'CatBoost', preprocessor)
+
+    # Log parameters
+    mlflow.log_params({
+        'model_type': 'CatBoostClassifier',
+        'iterations': 300,
+        'learning_rate': 0.1,
+        'depth': 6,
+        'random_seed': 42
+    })
+
+    # Log metrics
+    mlflow.log_metrics({
+        'accuracy': results['Accuracy'],
+        'precision': results['Precision'],
+        'recall': results['Recall'],
+        'f1_score': results['F1 Score'],
+        'roc_auc': results['ROC AUC']
+    })
+
+    # Log artifacts
+    mlflow.log_artifact(
+        str(config.CATBOOST_MODEL),
+        artifact_path='artifacts'
+    )
+
+    mlflow.log_artifact(
+        str(config.PREPROCESSOR),
+        artifact_path='artifacts'
+    )
+
 
 # ANN
 print('\nTraining ANN...')

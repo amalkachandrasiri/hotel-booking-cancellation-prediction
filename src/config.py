@@ -41,3 +41,6 @@ ADR_VS_CANCELLATION      = BASE_DIR / 'output' / 'figures' / 'adr_vs_cancellatio
 # artifacts 
 CATBOOST_MODEL           = BASE_DIR / 'artifacts' / 'catboost_model.cbm'
 PREPROCESSOR             = BASE_DIR / 'artifacts' / 'preprocessor.pkl'
+
+# mlflow path 
+MLFLOW_DB_PATH = BASE_DIR / 'mlflow.db'

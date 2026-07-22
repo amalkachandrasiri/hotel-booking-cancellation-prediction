@@ -87,22 +87,25 @@ def evaluate_model(model, X_test, y_test, model_name, preprocessor = None):
         file.write(str(cm))
         file.write('\n\n')
 
-        # Classification Report
-
+        # Classification Report 
+ 
         file.write('Classification Report\n\n')
         file.write(report)
         file.write('\n\n')
 
-    # Store Results
-    model_results.append({
+    results = {
         'Model': model_name,
         'Accuracy': accuracy,
         'Precision': precision,
         'Recall': recall,
         'F1 Score': f1,
         'ROC AUC': roc_auc
-    })
+    }   
 
+    # Store Results
+    model_results.append(results)
+    
+    '''
     # Save ROC Curve
     if y_prob is not None:
 
@@ -116,6 +119,9 @@ def evaluate_model(model, X_test, y_test, model_name, preprocessor = None):
     # Generate SHAP analysis for the best model - applies for CatBoost only as it was choosen as the best model 
     if model_name == 'CatBoost'and preprocessor is not None:
         generate_shap_analysis(model, X_test, preprocessor)
+    '''
+
+    return results
 
 # Compare Models
 def compare_models():
